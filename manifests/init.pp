@@ -15,6 +15,7 @@ class wildfly(
   $gid                          = $wildfly::params::gid,
   $group                        = $wildfly::params::group,
   $user                         = $wildfly::params::user,
+  $user_home                    = $wildfly::params::user_home,
   $dirname                      = $wildfly::params::dirname,
   $mode                         = $wildfly::params::mode,
   $mode_template                = $wildfly::params::mode_template,

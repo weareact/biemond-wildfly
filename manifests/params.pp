@@ -8,6 +8,7 @@ class wildfly::params {
   $gid            = undef
   $group          = 'wildfly'
   $user           = 'wildfly'
+  $user_home      = '/home/wildfly'
   $dirname        = '/opt/wildfly'
   $package_ensure = 'present'
 
