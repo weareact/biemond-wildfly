@@ -16,7 +16,7 @@ class wildfly::prepare {
       gid        => $wildfly::gid,
       groups     => $wildfly::group,
       shell      => '/bin/bash',
-      home       => $wildfly:user_home,
+      home       => $wildfly::user_home,
       comment    => "${wildfly::user} user created by Puppet",
       managehome => true,
       require    => Group[$wildfly::group],
