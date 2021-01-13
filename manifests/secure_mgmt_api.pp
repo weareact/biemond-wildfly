@@ -1,76 +1,77 @@
 class wildfly::secure_mgmt_api {
 
-require wildfly::service
+  require wildfly::service
 
-$mgmt_port = $wildfly::properties['jboss.management.https.port']
-
-  if $wildfly::mgmt_create_keystores {
-
-    if ($wildfly::mgmt_ssl_cert) and ($wildfly::mgmt_ssl_key) {
-
-      $ks_key = $wildfly::mgmt_ssl_key
-      $ks_cert  = $wildfly::mgmt_ssl_cert
-    }
-
-    else {
-
-      $ks_key = "${wildfly::dirname}/${wildfly::mode}/configuration/mgmt.key"
-      $ks_cert = "${wildfly::dirname}/${wildfly::mode}/configuration/mgmt.crt"
-
-      openssl::certificate::x509 { 'mgmt':
-        country      => 'WF',
-        organization => 'WFMgmt self signed',
-        commonname   => $fqdn,
-        base_dir     => "${wildfly::dirname}/${wildfly::mode}/configuration",
-        owner        => $wildfly::user,
-        group        => $wildfly::group,
-        notify       => Java_ks["${wildfly::mgmt_keystore_alias}:mgmtks"],
-      }
-    }
-
-    java_ks { "${wildfly::mgmt_keystore_alias}:mgmtks":
-      ensure      => latest,
-      certificate => $ks_cert,
-      private_key => $ks_key,
-      target      => $wildfly::mgmt_keystore,
-      password    => $wildfly::mgmt_keystore_pass,
-      path        => ["${wildfly::java_home}/bin"],
-      before      => Exec['Set https management interface'],
-    }
-
-    file { $wildfly::mgmt_keystore:
-      owner   => $wildfly::user,
-      group   => $wildfly::group,
-      require =>  Java_ks["${wildfly::mgmt_keystore_alias}:mgmtks"],
-    }
-
-    java_ks { 'cli:truststore':
-      ensure      => latest,
-      certificate => $ks_cert,
-      password    => 'cli_truststore',
-      target      => '/root/.jboss-cli.truststore',
-      path        => ["${wildfly::java_home}/bin"],
-      before      => Exec['Set https management interface'],
-    }
-
-    java_ks { 'wfcli:truststore':
-      ensure      => latest,
-      certificate => $ks_cert,
-      password    => 'cli_truststore',
-      target      => "/home/${wildfly::user}/.jboss-cli.truststore",
-      path        => ["${wildfly::java_home}/bin"],
-      before      => Exec['Set https management interface'],
-    }
-
-    file { "/home/${wildfly::user}/.jboss-cli.truststore":
-      owner   => $wildfly::user,
-      group   => $wildfly::group,
-      require => Java_ks['wfcli:truststore'],
-    }
-
-  }
+  $mgmt_port = $wildfly::properties['jboss.management.https.port']
 
   if $wildfly::mgmt_create_secure_resources {
+    if $wildfly::mgmt_create_keystores {
+
+      if ($wildfly::mgmt_ssl_cert) and ($wildfly::mgmt_ssl_key) {
+
+        $ks_key = $wildfly::mgmt_ssl_key
+        $ks_cert = $wildfly::mgmt_ssl_cert
+      }
+
+      else {
+
+        $ks_key = "${wildfly::dirname}/${wildfly::mode}/configuration/mgmt.key"
+        $ks_cert = "${wildfly::dirname}/${wildfly::mode}/configuration/mgmt.crt"
+
+        openssl::certificate::x509 { 'mgmt':
+          country      => 'WF',
+          organization => 'WFMgmt self signed',
+          commonname   => $fqdn,
+          base_dir     => "${wildfly::dirname}/${wildfly::mode}/configuration",
+          owner        => $wildfly::user,
+          group        => $wildfly::group,
+          notify       => Java_ks["${wildfly::mgmt_keystore_alias}:mgmtks"],
+        }
+      }
+
+      java_ks { "${wildfly::mgmt_keystore_alias}:mgmtks":
+        ensure      => latest,
+        certificate => $ks_cert,
+        private_key => $ks_key,
+        target      => $wildfly::mgmt_keystore,
+        password    => $wildfly::mgmt_keystore_pass,
+        path        => ["${wildfly::java_home}/bin"],
+        before      => Exec['Set https management interface'],
+      }
+
+      file { $wildfly::mgmt_keystore:
+        owner   => $wildfly::user,
+        group   => $wildfly::group,
+        require => Java_ks["${wildfly::mgmt_keystore_alias}:mgmtks"],
+      }
+
+      java_ks { 'cli:truststore':
+        ensure      => latest,
+        certificate => $ks_cert,
+        password    => 'cli_truststore',
+        target      => '/root/.jboss-cli.truststore',
+        path        => ["${wildfly::java_home}/bin"],
+        before      => Exec['Set https management interface'],
+      }
+
+      java_ks { 'wfcli:truststore':
+        ensure      => latest,
+        certificate => $ks_cert,
+        password    => 'cli_truststore',
+        target      => "/home/${wildfly::user}/.jboss-cli.truststore",
+        path        => ["${wildfly::java_home}/bin"],
+        before      => Exec['Set https management interface'],
+      }
+
+      file { "/home/${wildfly::user}/.jboss-cli.truststore":
+        owner   => $wildfly::user,
+        group   => $wildfly::group,
+        require => Java_ks['wfcli:truststore'],
+      }
+
+    }
+
+
     exec { 'secure mgmt reload':
       command     => "jboss-cli.sh -c ':reload'; sleep 5",
       refreshonly => true,
