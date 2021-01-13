@@ -70,35 +70,44 @@ $mgmt_port = $wildfly::properties['jboss.management.https.port']
 
   }
 
-  exec { 'secure mgmt reload':
-    command     => "jboss-cli.sh -c ':reload'; sleep 5",
-    refreshonly => true,
-    returns     => ['0', '1'],
-    path        => ['/bin', '/usr/bin', '/sbin', "${wildfly::dirname}/bin", "${wildfly::java_home}/bin"],
-  }
+  if $wildfly::mgmt_create_secure_resources {
+    exec { 'secure mgmt reload':
+      command     => "jboss-cli.sh -c ':reload'; sleep 5",
+      refreshonly => true,
+      returns     => ['0', '1'],
+      path        => ['/bin', '/usr/bin', '/sbin', "${wildfly::dirname}/bin", "${wildfly::java_home}/bin"],
+    }
 
-  exec { 'Set https management interface':
-    command => "sleep 5; jboss-cli.sh -c '/core-service=management/management-interface=http-interface:write-attribute(name=secure-socket-binding, value=management-https)'",
-    unless  => "grep -c \'https=\"management-https\"\' ${wildfly::dirname}/${wildfly::mode}/configuration/${wildfly::config}",
-    path    => ['/bin', '/usr/bin', '/sbin', "${wildfly::dirname}/bin", "${wildfly::java_home}/bin"],
-    before  => Augeas['set_jboss_cli_xml_https'],
-  }
+    exec { 'Set https management interface':
+      command =>
+        "sleep 5; jboss-cli.sh -c '/core-service=management/management-interface=http-interface:write-attribute(name=secure-socket-binding, value=management-https)'"
+      ,
+      unless  => "grep -c \'https=\"management-https\"\' ${wildfly::dirname}/${wildfly::mode}/configuration/${
+        wildfly::config}",
+      path    => ['/bin', '/usr/bin', '/sbin', "${wildfly::dirname}/bin", "${wildfly::java_home}/bin"],
+      before  => Augeas['set_jboss_cli_xml_https'],
+    }
 
-  exec { 'Set Realm to use SSL':
-    command     => "jboss-cli.sh -c \'/core-service=management/security-realm=ManagementRealm/server-identity=ssl:add(keystore-path=${wildfly::mgmt_keystore},keystore-password=${wildfly::mgmt_keystore_pass},alias=${wildfly::mgmt_keystore_alias}\'",
-    unless      => "grep -c ${wildfly::mgmt_keystore} ${wildfly::dirname}/${wildfly::mode}/configuration/${wildfly::config}",
-    path        => ['/bin', '/usr/bin', '/sbin', "${wildfly::dirname}/bin", "${wildfly::java_home}/bin"],
-    environment => "JAVA_HOME=${wildfly::java_home}",
-    before      => Augeas['set_jboss_cli_xml_https'],
-    subscribe   => Exec['Set https management interface'],
-    notify      => Exec['secure mgmt reload'],
-  }
+    exec { 'Set Realm to use SSL':
+      command     =>
+        "jboss-cli.sh -c \'/core-service=management/security-realm=ManagementRealm/server-identity=ssl:add(keystore-path=
+          ${wildfly::mgmt_keystore},keystore-password=${wildfly::mgmt_keystore_pass},alias=${
+          wildfly::mgmt_keystore_alias}\'",
+      unless      => "grep -c ${wildfly::mgmt_keystore} ${wildfly::dirname}/${wildfly::mode}/configuration/${
+        wildfly::config}",
+      path        => ['/bin', '/usr/bin', '/sbin', "${wildfly::dirname}/bin", "${wildfly::java_home}/bin"],
+      environment => "JAVA_HOME=${wildfly::java_home}",
+      before      => Augeas['set_jboss_cli_xml_https'],
+      subscribe   => Exec['Set https management interface'],
+      notify      => Exec['secure mgmt reload'],
+    }
 
-  augeas { 'set_jboss_cli_xml_https':
-    lens      => 'Xml.lns',
-    incl      => "${wildfly::dirname}/bin/jboss-cli.xml",
-    changes   => ['set jboss-cli/default-controller/protocol/#text https-remoting',
-                "set jboss-cli/default-controller/port/#text ${mgmt_port}" ],
-    subscribe => Exec['secure mgmt reload'],
+    augeas { 'set_jboss_cli_xml_https':
+      lens      => 'Xml.lns',
+      incl      => "${wildfly::dirname}/bin/jboss-cli.xml",
+      changes   => ['set jboss-cli/default-controller/protocol/#text https-remoting',
+        "set jboss-cli/default-controller/port/#text ${mgmt_port}" ],
+      subscribe => Exec['secure mgmt reload'],
+    }
   }
 }

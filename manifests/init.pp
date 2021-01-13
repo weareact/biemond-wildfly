@@ -125,6 +125,7 @@ class wildfly(
   Optional[String] $overlay_class                             = undef,
   Optional[Stdlib::Unixpath] $mgmt_ssl_cert                   = undef,
   Optional[Stdlib::Unixpath] $mgmt_ssl_key                    = undef,
+  Optional[Boolean] $mgmt_create_secure_resources             = true,
 ) {
 
   contain wildfly::prepare
