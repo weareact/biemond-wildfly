@@ -49,6 +49,7 @@ define wildfly::elytron::https (
   }
   ->
   wildfly::resource { "/subsystem=undertow/server=default-server/https-listener=https":
+    undefine_attributes => true,
     content => {
       'ssl-context' => "${title}-SSC",
       'security-realm' => undef
