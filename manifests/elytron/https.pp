@@ -42,7 +42,7 @@ define wildfly::elytron::https (
       'want-client-auth'        => $want_client_auth,
       'need-client-auth'        => $need_client_auth,
       'authentication-optional' => $authentication_optional,
-      'credential-refrence'     => {
+      'credential-reference'     => {
         'clear-text' => $keystore_password
       }
     }
