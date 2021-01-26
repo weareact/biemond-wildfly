@@ -18,7 +18,7 @@ define wildfly::elytron::https (
       'path'                => $keystore_path,
       'relative-to'         => $keystore_relative_to,
       'type'                => 'JKS',
-      'credential-refrence' => {
+      'credential-reference' => {
         'clear-text' => $keystore_password
       }
     }
@@ -27,7 +27,7 @@ define wildfly::elytron::https (
   wildfly::resource { "/subsystem=elytron/key-manager=${title}-KM":
     content => {
       'key-store'           => "${title}-KS",
-      'credential-refrence' => {
+      'credential-reference' => {
         'clear-text' => $keystore_password
       }
     }
