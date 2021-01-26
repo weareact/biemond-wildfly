@@ -41,10 +41,7 @@ define wildfly::elytron::https (
       'use-cipher-suites-order' => $use_cipher_suites_order,
       'want-client-auth'        => $want_client_auth,
       'need-client-auth'        => $need_client_auth,
-      'authentication-optional' => $authentication_optional,
-      'credential-reference'     => {
-        'clear-text' => $keystore_password
-      }
+      'authentication-optional' => $authentication_optional
     }
   }
   ->
