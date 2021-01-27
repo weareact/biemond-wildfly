@@ -10,14 +10,16 @@ define wildfly::elytron::https (
   $use_cipher_suites_order = false,
   $want_client_auth        = false,
   $need_client_auth        = false,
-  $authentication_optional = false
+  $authentication_optional = false,
+  $use_for_undertow        = true,
+  $use_for_management      = false
 ) {
 
   wildfly::resource { "/subsystem=elytron/key-store=${title}-KS":
     content => {
-      'path'                => $keystore_path,
-      'relative-to'         => $keystore_relative_to,
-      'type'                => 'JKS',
+      'path'                 => $keystore_path,
+      'relative-to'          => $keystore_relative_to,
+      'type'                 => 'JKS',
       'credential-reference' => {
         'clear-text' => $keystore_password
       }
@@ -26,7 +28,7 @@ define wildfly::elytron::https (
   ->
   wildfly::resource { "/subsystem=elytron/key-manager=${title}-KM":
     content => {
-      'key-store'           => "${title}-KS",
+      'key-store'            => "${title}-KS",
       'credential-reference' => {
         'clear-text' => $keystore_password
       }
@@ -44,12 +46,25 @@ define wildfly::elytron::https (
       'authentication-optional' => $authentication_optional
     }
   }
-  ->
-  wildfly::resource { "/subsystem=undertow/server=default-server/https-listener=https":
-    undefine_attributes => true,
-    content => {
-      'ssl-context' => "${title}-SSC",
-      'security-realm' => undef
+
+  if $use_for_undertow {
+    wildfly::resource { "/subsystem=undertow/server=default-server/https-listener=https":
+      undefine_attributes => true,
+      content             => {
+        'ssl-context'    => "${title}-SSC",
+        'security-realm' => undef
+      },
+      require             => Wildfly::Resource["/subsystem=elytron/server-ssl-context=${title}-SSC"]
+    }
+  }
+
+  if $use_for_management {
+    wildfly::resource { "/core-service=management/management-interface=http-interface":
+      content => {
+        'ssl-context'           => "${title}-SSC",
+        'secure-socket-binding' => "management-https"
+      },
+      require => Wildfly::Resource["/subsystem=elytron/server-ssl-context=${title}-SSC"]
     }
   }
 
