@@ -73,6 +73,10 @@ define wildfly::elytron::https (
     command     => "/subsystem=elytron/key-store=${title}-KS:load",
     refreshonly => true,
     require     => Wildfly::Resource["/subsystem=elytron/key-store=${title}-KS"]
+  } ~>
+  wildfly::cli { "${title}-KM-Init":
+    command     => "/subsystem=elytron/key-manager=${title}-KM:init",
+    refreshonly => true,
+    require     => Wildfly::Resource["/subsystem=elytron/key-manager=${title}-KM"]
   }
-
 }
