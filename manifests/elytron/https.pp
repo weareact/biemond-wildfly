@@ -12,7 +12,8 @@ define wildfly::elytron::https (
   $need_client_auth        = false,
   $authentication_optional = false,
   $use_for_undertow        = true,
-  $use_for_management      = false
+  $use_for_management      = false,
+  $https_listener_attributes = {}
 ) {
 
   wildfly::resource { "/subsystem=elytron/key-store=${title}-KS":
@@ -48,12 +49,14 @@ define wildfly::elytron::https (
   }
 
   if $use_for_undertow {
+    $_https_listener_defaults = {
+      'ssl-context'    => "${title}-SSC",
+      'security-realm' => undef
+    }
+
     wildfly::resource { "/subsystem=undertow/server=default-server/https-listener=https":
       undefine_attributes => true,
-      content             => {
-        'ssl-context'    => "${title}-SSC",
-        'security-realm' => undef
-      },
+      content             => $_https_listener_defaults + $https_listener_attributes,
       require             => Wildfly::Resource["/subsystem=elytron/server-ssl-context=${title}-SSC"]
     }
   }
