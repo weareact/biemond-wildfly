@@ -12,7 +12,7 @@
     <resource-root path="<%= $resource -%>">
       <filters>
       <%  $filters.each |$filter| { -%>
-        <exclude path="<% $filter -%>"/>
+        <exclude path="<%= $filter -%>"/>
       <%  } -%>
       </filters>
     </resource-root>
