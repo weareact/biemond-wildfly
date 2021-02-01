@@ -8,16 +8,16 @@
 
   <resources>
   <%- $resources.each |$resource, $filters| { -%>
-    <%- if $filters { -%>
+    <%- if empty($filters) { -%>
+    <resource-root path="<%= $resource -%>"/>
+    <%- } else { -%>
     <resource-root path="<%= $resource -%>">
       <filter>
       <%-  $filters.each |$filter| { -%>
         <exclude path="<%= $filter -%>"/>
-      <%-  } -%>
+      <%- } -%>
       </filter>
     </resource-root>
-    <%- } else { -%>
-    <resource-root path="<%= $resource -%>"/>
     <%- } -%>
   <%- } -%>
   </resources>
