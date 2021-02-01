@@ -10,11 +10,11 @@
   <%- $resources.each |$resource, $filters| { -%>
     <%- if $filters { -%>
     <resource-root path="<%= $resource -%>">
-      <filters>
+      <filter>
       <%-  $filters.each |$filter| { -%>
         <exclude path="<%= $filter -%>"/>
       <%-  } -%>
-      </filters>
+      </filter>
     </resource-root>
     <%- } else { -%>
     <resource-root path="<%= $resource -%>"/>
