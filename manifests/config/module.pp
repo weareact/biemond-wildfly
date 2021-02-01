@@ -6,12 +6,15 @@
 # @param dependencies Sets the dependencies for this module e.g. `javax.transaction`.
 # @param system Whether this is a system (`system/layers/base`) module or not.
 # @param custom_file Sets a file source for module.xml. If set, template is ignored.
-define wildfly::config::module(
+define wildfly::config::module (
   Variant[Pattern[/^\./], Pattern[/^file:\/\//], Pattern[/^puppet:\/\//], Stdlib::Httpsurl, Stdlib::Httpurl] $source,
-  String $template = 'wildfly/module.xml',
-  Optional[Boolean] $system = true,
-  Optional[Array] $dependencies = [],
-  Optional[String] $custom_file = undef) {
+  String $template                     = 'wildfly/module.xml',
+  Optional[Boolean] $system            = true,
+  Optional[Array] $dependencies        = [],
+  Optional[Hash] $properties           = {},
+  Optional[Hash] $additional_resources = {},
+  Optional[String] $custom_file        = undef
+) {
 
   require wildfly::install
 
@@ -29,7 +32,7 @@ define wildfly::config::module(
   $dir_path = "${wildfly::dirname}/modules/${module_dir}/${namespace_path}/main"
 
   exec { "Create Parent Directories: ${title}":
-    path    => ['/bin','/usr/bin', '/sbin'],
+    path    => ['/bin', '/usr/bin', '/sbin'],
     command => "mkdir -p ${dir_path}",
     unless  => "test -d ${dir_path}",
     user    => $wildfly::user,
@@ -43,16 +46,16 @@ define wildfly::config::module(
   }
 
   if $source == '.' {
-    $file_name = '.'
+    $_file_name = '.'
   } else {
-    $file_name = basename($source)
+    $_file_name = basename($source)
   }
 
   case $source {
     '.': {
     }
     /^(file:|puppet:)/: {
-      file { "${dir_path}/${file_name}":
+      file { "${dir_path}/${_file_name}":
         ensure => file,
         owner  => $::wildfly::user,
         group  => $::wildfly::group,
@@ -60,16 +63,16 @@ define wildfly::config::module(
         source => $source
       }
     }
-    default : {
+    default: {
       exec { "download module from ${source}":
         command  => "wget -N -P ${dir_path} ${source} --max-redirect=5",
-        path     => ['/bin','/usr/bin', '/sbin'],
+        path     => ['/bin', '/usr/bin', '/sbin'],
         loglevel => 'notice',
-        creates  => "${dir_path}/${file_name}",
+        creates  => "${dir_path}/${_file_name}",
         require  => File[$wildfly::dirname],
       }
 
-      file { "${dir_path}/${file_name}":
+      file { "${dir_path}/${_file_name}":
         ensure  => file,
         owner   => $::wildfly::user,
         group   => $::wildfly::group,
@@ -87,9 +90,15 @@ define wildfly::config::module(
       content => file($custom_file),
     }
   } else {
+    $_default_resource = {
+      $_file_name => undef
+    }
+    $_merged_resources = merge($_default_resource, $additional_resources)
     $params = {
-      'file_name'    => $file_name,
+      'file_name'    => $_file_name,
       'dependencies' => $dependencies,
+      'properties'   => $properties,
+      'resources'    => $_merged_resources,
       'name'         => $title
     }
 

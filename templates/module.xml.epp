@@ -1,11 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module xmlns="urn:jboss:module:1.0" name="<%= $name %>">
+<module xmlns="urn:jboss:module:1.5" name="<%= $name %>">
+  <properties>
+    <% $properties.each |$property, $value| { -%>
+    <property name="<%= $property -%>" value="<%= $value -%>"/>
+    <% } -%>
+  </properties>
+
   <resources>
-    <resource-root path="<%= $file_name %>"/>
+  <% $resources.each |$resource, $filters| { -%>
+    <% if $filters { -%>
+    <resource-root path="<%= $resource -%>">
+      <filters>
+      <%  $filters.each |$filter| { -%>
+        <exclude path="<% $filter -%>"/>
+      <%  } -%>
+      </filters>
+    </resource-root>
+    <% } else { -%>
+    <resource-root path="<%= $resource -%>"/>
+    <% } -%>
+  <% } -%>
   </resources>
+
   <dependencies>
     <% $dependencies.each |$dependency| { -%>
-    <module name="<%= $dependency %>"/>
+    <module name="<%= $dependency -%>"/>
     <% } -%>
   </dependencies>
 </module>
