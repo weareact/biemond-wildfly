@@ -11,7 +11,7 @@
 # @param password The password for Wildfly's management user.
 # @param host The IP address or FQDN of the JBoss Management service.
 # @param port The port of the JBoss Management service.
-define wildfly::deployment(
+define wildfly::deployment (
   Variant[Pattern[/^file:\/\//], Pattern[/^puppet:\/\//], Stdlib::Httpsurl, Stdlib::Httpurl] $source,
   Enum[present, absent] $ensure  = present,
   Optional[Integer] $timeout     = undef,
@@ -22,6 +22,7 @@ define wildfly::deployment(
   String $host                   = $wildfly::properties['jboss.bind.address.management'],
   String $port                   = $wildfly::properties['jboss.management.http.port'],
   Boolean $secure                = $wildfly::secure_mgmt_api,
+  Boolean $ensure_enabled        = false,
 ) {
   $file_name = basename($source)
 
@@ -52,6 +53,13 @@ define wildfly::deployment(
     source            => "${wildfly::deploy_cache_dir}/${file_name}",
     operation_headers => $operation_headers,
     require           => [Service['wildfly'], File["${wildfly::deploy_cache_dir}/${file_name}"]],
+  }
+
+  if $ensure_enabled {
+    wildfly::cli { "ensure-enabled-${title}":
+      command => "deployment enable ${title}",
+      onlyif => "(result != OK) of /deployment=${title}:read-attribute(name=status)"
+    }
   }
 
 }
