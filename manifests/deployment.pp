@@ -58,7 +58,9 @@ define wildfly::deployment (
   if $ensure_enabled {
     wildfly::cli { "ensure-enabled-${title}":
       command => "deployment enable ${title}",
-      onlyif => "(result != OK) of /deployment=${title}:read-attribute(name=status)"
+      onlyif => "(result != OK) of /deployment=${title}:read-attribute(name=status)",
+      refreshonly => true,
+      subscribe => Wildfly_deployment[$title]
     }
   }
 
