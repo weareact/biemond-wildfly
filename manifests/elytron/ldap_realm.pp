@@ -52,7 +52,7 @@ define wildfly::elytron::ldap_realm (
       'dir-context'         => $directory_context,
       'direct-verification' => $direct_verification,
       'identity-mapping'    => {
-        'rdn-identifier'       => $_user_identifer,
+        'rdn-identifier'       => $_user_identifier,
         'use-recursive-search' => $recursive_user_search,
         'search-base-dn'       => $user_search_base,
         'attribute-mapping'    => $_attribute_mappings
