@@ -14,6 +14,12 @@ define wildfly::elytron::ldap_auth (
   Optional[String] $principal_password                      = undef,
 ) {
 
+  ensure_resource('wildfly::resource', "/subsystem=elytron/simple-role-decoder=from-roles-attribute", {
+    content => {
+      'attribute' => 'Roles',
+    }
+  })
+
   wildfly::elytron::directory_context { "${title}-DC":
     url                => $url,
     principal_user     => $principal_user,
@@ -23,11 +29,6 @@ define wildfly::elytron::ldap_auth (
     directory_context => "${title}-DC",
     directory_base    => $directory_base,
     directory_type    => $directory_type,
-  } ->
-  wildfly::resource { "/subsystem=elytron/simple-role-decoder=from-roles-attribute":
-    content => {
-      'attribute' => 'Roles',
-    }
   } ->
   wildfly::elytron::security_domain { "${title}-SD":
     default_realm => "${title}-LR",
