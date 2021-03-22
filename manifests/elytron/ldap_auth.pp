@@ -35,10 +35,6 @@ define wildfly::elytron::ldap_auth (
     realms        => [{
       'realm'        => "${title}-LR",
       'role-decoder' => "from-roles-attribute"
-    },
-    {
-      'realm'        => "local",
-      'role-mapper' => "super-user-mapper"
     }],
   } ->
   wildfly::elytron::http_authentication_factory { "${title}-HAF":
