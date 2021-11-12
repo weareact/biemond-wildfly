@@ -36,7 +36,7 @@ define wildfly::security::domain(
 
   $login_modules.each |$login_module, $login_module_opts | {
     wildfly::security::login_module { $login_module:
-      * => $login_module
+      * => $login_module_opts
     }
   }
 
