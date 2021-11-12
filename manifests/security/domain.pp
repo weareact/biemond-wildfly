@@ -20,8 +20,8 @@
 #    }
 #
 define wildfly::security::domain(
-  $domain_name   = $title,
-  $login_modules = {}
+  String $domain_name   = $title,
+  Hash $login_modules = {}
 ) {
 
   wildfly::resource { "/subsystem=security/security-domain=${domain_name}":
