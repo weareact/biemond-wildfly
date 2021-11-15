@@ -2,7 +2,7 @@
 # Configures a queue
 #
 define wildfly::messaging::activemq::queue(
-  Optional[String] $entries = undef,
+  Optional[Array[String]] $entries = undef,
   Optional[String] $durable = undef,
   Optional[String] $selector = undef,
   Optional[String] $target_profile = undef
