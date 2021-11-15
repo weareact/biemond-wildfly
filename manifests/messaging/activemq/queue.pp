@@ -3,7 +3,7 @@
 #
 define wildfly::messaging::activemq::queue(
   Optional[Array[String]] $entries = undef,
-  Optional[String] $durable = undef,
+  Optional[Boolean] $durable = undef,
   Optional[String] $selector = undef,
   Optional[String] $target_profile = undef
 ) {
