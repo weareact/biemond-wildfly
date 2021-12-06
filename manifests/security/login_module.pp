@@ -21,7 +21,12 @@
 #    name2: value2
 #  ```
 #
-define wildfly::security::login_module($domain, $code, $flag, $module_options={}) {
+define wildfly::security::login_module(
+  String $domain,
+  String $code,
+  String $flag,
+  Hash $module_options = {}
+) {
 
   wildfly::resource { "/subsystem=security/security-domain=${domain}/authentication=classic/login-module=${code}":
     content => {

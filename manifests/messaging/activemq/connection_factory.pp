@@ -2,9 +2,10 @@
 # Configures a connection factory
 #
 define wildfly::messaging::activemq::connection_factory(
-  $entries = undef,
-  $connectors = undef,
-  $target_profile = undef) {
+  Optional[Array[String]] $entries = undef,
+  Optional[Array[String]] $connectors = undef,
+  Optional[String] $target_profile = undef
+) {
 
   $params = {
     'entries' => $entries,
