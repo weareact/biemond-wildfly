@@ -2,7 +2,7 @@
 #
 class wildfly::service::systemd {
 
-  if $wildfly::service::systemd_template == 'wildfly/wildfly.systemd.service' {
+  if $wildfly::service::systemd_template =~ /wildfly\/wildfly(\d*)\.systemd\.service/ {
     # Use native script
     file { "${wildfly::dirname}/bin/launch.sh" :
       ensure  => present,
